@@ -1,6 +1,6 @@
 // src/services/api.js
 
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://chatbot-application-backednd.onrender.com";
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://chatbot-backend-0qz4.onrender.com";
 
 export const chatAPI = {
   sendMessage: async (message) => {
