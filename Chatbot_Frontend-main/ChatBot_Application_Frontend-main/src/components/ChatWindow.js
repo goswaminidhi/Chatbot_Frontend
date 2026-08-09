@@ -1,215 +1,8 @@
-// import React, { useState, useRef, useEffect } from 'react';
-// import ReactMarkdown from 'react-markdown';
-// import { chatAPI } from '../services/api';
-// import './ChatWindow.css';
-
-// const BOT_INTRO = {
-//   id: 'intro',
-//   role: 'bot',
-//   text: "Hello! I'm your **AI Chatbot Application** powered by Spring Boot.\n\nAsk me anything — I'm here to help! ✨",
-//   time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-// };
-
-// function TypingIndicator() {
-//   return (
-//     <div className="msg bot">
-//       <div className="msg-avatar bot-av">AI</div>
-//       <div className="bubble bot-bubble typing-bubble">
-//         <span className="dot" />
-//         <span className="dot" />
-//         <span className="dot" />
-//       </div>
-//     </div>
-//   );
-// }
-
-// function Message({ msg }) {
-//   const isUser = msg.role === 'user';
-//   return (
-//     <div className={`msg ${isUser ? 'user' : 'bot'}`}>
-//       {!isUser && <div className="msg-avatar bot-av">AI</div>}
-//       <div className={`bubble-wrap ${isUser ? 'user-wrap' : 'bot-wrap'}`}>
-//         <div className={`bubble ${isUser ? 'user-bubble' : 'bot-bubble'}`}>
-//           <ReactMarkdown>{msg.text}</ReactMarkdown>
-//         </div>
-//         <span className="msg-time">{msg.time}</span>
-//       </div>
-//       {isUser && <div className="msg-avatar user-av">You</div>}
-//     </div>
-//   );
-// }
-
-// export default function ChatWindow() {
-//   const [messages, setMessages] = useState([BOT_INTRO]);
-//   const [input, setInput] = useState('');
-//   const [loading, setLoading] = useState(false);
-//   const bottomRef = useRef(null);
-//   const inputRef = useRef(null);
-//   const eventSourceRef = useRef(null);
-
-//   useEffect(() => {
-//     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-//   }, [messages, loading]);
-
-//   // Clean up any open stream if the component unmounts mid-response
-//   useEffect(() => {
-//     return () => {
-//       if (eventSourceRef.current) {
-//         eventSourceRef.current.close();
-//       }
-//     };
-//   }, []);
-
-//   const sendMessage = () => {
-//     const text = input.trim();
-//     if (!text || loading) return;
-
-//     // Close any previous stream still open before starting a new one
-//     if (eventSourceRef.current) {
-//       eventSourceRef.current.close();
-//     }
-
-//     const userMsg = {
-//       id: Date.now(),
-//       role: 'user',
-//       text,
-//       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-//     };
-
-//     const botMsgId = Date.now() + 1;
-//     const botMsg = {
-//       id: botMsgId,
-//       role: 'bot',
-//       text: '',
-//       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-//     };
-
-//     setMessages((prev) => [...prev, userMsg, botMsg]);
-//     setInput('');
-//     setLoading(true);
-
-//     const eventSource = chatAPI.streamMessage(
-//       text,
-//       // onChunk — append incoming text to the bot bubble as it streams in
-//       (chunk) => {
-//         setMessages((prev) =>
-//           prev.map((m) =>
-//             m.id === botMsgId ? { ...m, text: m.text + chunk } : m
-//           )
-//         );
-//       },
-//       // onDone
-//       () => {
-//         setLoading(false);
-//         inputRef.current?.focus();
-//       },
-//       // onError
-//       () => {
-//         setMessages((prev) =>
-//           prev.map((m) =>
-//             m.id === botMsgId && m.text === ''
-//               ? { ...m, text: '⚠️ Something went wrong. Please make sure the server is running.' }
-//               : m
-//           )
-//         );
-//         setLoading(false);
-//       }
-//     );
-
-//     eventSourceRef.current = eventSource;
-//   };
-
-//   const handleKeyDown = (e) => {
-//     if (e.key === 'Enter' && !e.shiftKey) {
-//       e.preventDefault();
-//       sendMessage();
-//     }
-//   };
-
-//   const clearChat = () => {
-//     if (eventSourceRef.current) {
-//       eventSourceRef.current.close();
-//     }
-//     setMessages([BOT_INTRO]);
-//   };
-
-//   return (
-//     <div className="chat-window">
-//       {/* Header */}
-//       <div className="chat-header">
-//         <div className="header-left">
-//           <div className="header-avatar">
-//             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-//               <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-//             </svg>
-//           </div>
-//           <div>
-//             <h1 className="header-title">AI Chatbot</h1>
-//             <p className="header-sub">
-//               <span className="status-dot" />
-//               Powered by Spring Boot
-//             </p>
-//           </div>
-//         </div>
-//         <button className="clear-btn" onClick={clearChat} title="Clear chat">
-//           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-//             <polyline points="1 4 1 10 7 10" />
-//             <path d="M3.51 15a9 9 0 1 0 .49-3.51" />
-//           </svg>
-//           New Chat
-//         </button>
-//       </div>
-
-//       {/* Messages */}
-//       <div className="chat-messages">
-//         {messages.map((msg) => (
-//           <Message key={msg.id} msg={msg} />
-//         ))}
-//         {loading && <TypingIndicator />}
-//         <div ref={bottomRef} />
-//       </div>
-
-//       {/* Input */}
-//       <div className="chat-input-area">
-//         <div className="input-wrapper">
-//           <textarea
-//             ref={inputRef}
-//             className="chat-input"
-//             placeholder="Ask me anything..."
-//             value={input}
-//             onChange={(e) => setInput(e.target.value)}
-//             onKeyDown={handleKeyDown}
-//             rows={1}
-//           />
-//           <button
-//             className={`send-btn ${input.trim() && !loading ? 'active' : ''}`}
-//             onClick={sendMessage}
-//             disabled={!input.trim() || loading}
-//             aria-label="Send"
-//           >
-//             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-//               <line x1="22" y1="2" x2="11" y2="13" />
-//               <polygon points="22 2 15 22 11 13 2 9 22 2" />
-//             </svg>
-//           </button>
-//         </div>
-//         <p className="input-hint">Press Enter to send · Shift+Enter for new line</p>
-//       </div>
-//     </div>
-//   );
-// }
-
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { chatAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import './ChatWindow.css';
-
-const BOT_INTRO = {
-  id: 'intro',
-  role: 'bot',
-  text: "Hello! I'm your **AI Chatbot Application** powered by Spring Boot.\n\nAsk me anything — I'm here to help! ✨",
-  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-};
 
 function TypingIndicator() {
   return (
@@ -235,49 +28,53 @@ function Message({ msg }) {
         </div>
         <span className="msg-time">{msg.time}</span>
       </div>
-      {isUser && <div className="msg-avatar user-av">You</div>}
+      {isUser && <div className="msg-avatar user-av">{msg.userInitial || 'You'}</div>}
     </div>
   );
 }
 
 export default function ChatWindow() {
+  const { token, user, logout } = useAuth();
+
+  const BOT_INTRO = {
+    id: 'intro',
+    role: 'bot',
+    text: `Hello ${user?.name || ''}! I'm your **AI Chatbot Application** powered by Spring Boot.\n\nAsk me anything — I'm here to help! ✨`,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  };
+
   const [messages, setMessages] = useState([BOT_INTRO]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const eventSourceRef = useRef(null);
-
-  // One conversationId per chat session — persists across messages,
-  // resets only when the user clicks "New Chat"
   const conversationIdRef = useRef(crypto.randomUUID());
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  // Clean up any open stream if the component unmounts mid-response
   useEffect(() => {
     return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
+      if (eventSourceRef.current) eventSourceRef.current.close();
     };
   }, []);
+
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
 
   const sendMessage = () => {
     const text = input.trim();
     if (!text || loading) return;
 
-    // Close any previous stream still open before starting a new one
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
+    if (eventSourceRef.current) eventSourceRef.current.close();
 
     const userMsg = {
       id: Date.now(),
       role: 'user',
       text,
+      userInitial,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
@@ -296,20 +93,16 @@ export default function ChatWindow() {
     const eventSource = chatAPI.streamMessage(
       text,
       conversationIdRef.current,
-      // onChunk — append incoming text to the bot bubble as it streams in
+      token,
       (chunk) => {
         setMessages((prev) =>
-          prev.map((m) =>
-            m.id === botMsgId ? { ...m, text: m.text + chunk } : m
-          )
+          prev.map((m) => (m.id === botMsgId ? { ...m, text: m.text + chunk } : m))
         );
       },
-      // onDone
       () => {
         setLoading(false);
         inputRef.current?.focus();
       },
-      // onError
       () => {
         setMessages((prev) =>
           prev.map((m) =>
@@ -333,17 +126,13 @@ export default function ChatWindow() {
   };
 
   const clearChat = () => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
-    // New session = new memory on the backend
+    if (eventSourceRef.current) eventSourceRef.current.close();
     conversationIdRef.current = crypto.randomUUID();
     setMessages([BOT_INTRO]);
   };
 
   return (
     <div className="chat-window">
-      {/* Header */}
       <div className="chat-header">
         <div className="header-left">
           <div className="header-avatar">
@@ -359,16 +148,38 @@ export default function ChatWindow() {
             </p>
           </div>
         </div>
-        <button className="clear-btn" onClick={clearChat} title="Clear chat">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="1 4 1 10 7 10" />
-            <path d="M3.51 15a9 9 0 1 0 .49-3.51" />
-          </svg>
-          New Chat
-        </button>
+
+        <div className="header-right">
+          <button className="clear-btn" onClick={clearChat} title="Clear chat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="1 4 1 10 7 10" />
+              <path d="M3.51 15a9 9 0 1 0 .49-3.51" />
+            </svg>
+            New Chat
+          </button>
+
+          <div className="user-menu-wrap">
+            <button className="user-avatar-btn" onClick={() => setMenuOpen((v) => !v)}>
+              {userInitial}
+            </button>
+            {menuOpen && (
+              <div className="user-menu">
+                <p className="user-menu-name">{user?.name}</p>
+                <p className="user-menu-email">{user?.email}</p>
+                <button className="user-menu-logout" onClick={logout}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  Log out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Messages */}
       <div className="chat-messages">
         {messages.map((msg) => (
           <Message key={msg.id} msg={msg} />
@@ -377,7 +188,6 @@ export default function ChatWindow() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
       <div className="chat-input-area">
         <div className="input-wrapper">
           <textarea

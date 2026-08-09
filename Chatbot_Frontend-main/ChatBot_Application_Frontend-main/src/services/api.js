@@ -1,28 +1,10 @@
 const BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://chatbot-backend-0qz4.onrender.com";
 
 export const chatAPI = {
-  // Non-streaming (kept in case you still need it elsewhere)
-  // sendMessage: async (message, conversationId) => {
-  //   const res  ponse = await fetch(`${BASE_URL}/api/chat`, {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ message, conversationId }),
-  //   });
-
-  //   if (!response.ok) {
-  //     throw new Error("Failed to get response from server");
-  //   }
-
-  //   return response.json();
-  // },
-
-  // Streaming version — now includes conversationId
-  streamMessage: (message, conversationId, onChunk, onDone, onError) => {
+  streamMessage: (message, conversationId, token, onChunk, onDone, onError) => {
     const url = `${BASE_URL}/api/chat/stream?message=${encodeURIComponent(
       message
-    )}&conversationId=${encodeURIComponent(conversationId)}`;
+    )}&conversationId=${encodeURIComponent(conversationId)}&token=${encodeURIComponent(token)}`;
 
     const eventSource = new EventSource(url);
 
