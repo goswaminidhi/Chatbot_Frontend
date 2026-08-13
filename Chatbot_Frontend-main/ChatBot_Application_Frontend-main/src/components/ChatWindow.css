@@ -21,8 +21,8 @@ html, body {
 .chat-window {
   width: 100%;
   max-width: 780px;
-  height: 100%;                 /* ← FIXED: fill the container height (which is already capped to 100vh) */
-  max-height: 820px;
+  height: 100vh;                 /* ← FIXED: fill the container height (which is already capped to 100vh) */
+  max-height: 100vh;
   min-height: 0;
   display: flex;
   flex-direction: column;
